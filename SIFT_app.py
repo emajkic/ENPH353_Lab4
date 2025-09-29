@@ -82,10 +82,6 @@ class My_App(QtWidgets.QMainWindow):
 			if ref_element.distance < thresh*frame_element.distance: 
 				good_points.append(ref_element)
 
-		# Draw matches
-		img3 = cv2.drawMatches(self.reference_image, self.reference_kp, gray_frame, frame_kp, good_points, gray_frame)		
-		cv2.imshow("", img3)
-
 		# Homography
 		homography_thresh = 10
 
@@ -94,19 +90,19 @@ class My_App(QtWidgets.QMainWindow):
 			train_points = np.float32([frame_kp[ref_element.trainIdx].pt for ref_element in good_points]).reshape(-1, 1, 2)
 
 			matrix, mask = cv2.findHomography(query_points, train_points, cv2.RANSAC, 5.0)
-			matches_mask = mask.ravel.tolist()
+			#matches_mask = mask.ravel.tolist()
 
 			# perspective transform
 			height, width = self.reference_image.shape
 			corners = np.float32([[0,0], [0, height], [width, height], [width, 0]]).reshape(-1, 1, 2)
 			distortion = cv2.perspectiveTransform(corners, matrix)
 
-			cv2.polylines(frame, [np.int32(distortion)], True, (255,0,0), 3)
-			#cv2.imshow("Homography", homography)
-		#else:
-			#cv2.imshow("Homography", gray_frame)
+			cv2.polylines(frame, [np.int32(distortion)], True, (255,0,0), 3) 
+			pixmap = self.convert_cv_to_pixmap(frame)
+		else:
+			matches_frame = cv2.drawMatches(self.reference_image, self.reference_kp, gray_frame, frame_kp, good_points, gray_frame)		
+			pixmap = self.convert_cv_to_pixmap(matches_frame)
 
-		pixmap = self.convert_cv_to_pixmap(frame)
 		self.live_image_label.setPixmap(pixmap)
 
 	def SLOT_toggle_camera(self):
