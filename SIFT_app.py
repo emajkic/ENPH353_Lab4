@@ -100,8 +100,20 @@ class My_App(QtWidgets.QMainWindow):
 			cv2.polylines(frame, [np.int32(distortion)], True, (255,0,0), 3) 
 			pixmap = self.convert_cv_to_pixmap(frame)
 		else:
-			matches_frame = cv2.drawMatches(self.reference_image, self.reference_kp, gray_frame, frame_kp, good_points, gray_frame)		
-			pixmap = self.convert_cv_to_pixmap(matches_frame)
+			# araw matches
+			matches_frame = cv2.drawMatches(
+			self.reference_image, self.reference_kp,
+			gray_frame, frame_kp,
+			good_points, None,
+			flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
+			)
+
+			# resize matches_frame to fit QLabel
+			label_width = self.live_image_label.width()
+			label_height = self.live_image_label.height()
+			matches_frame_resized = cv2.resize(matches_frame, (label_width, label_height), interpolation=cv2.INTER_AREA)
+
+			pixmap = self.convert_cv_to_pixmap(matches_frame_resized)
 
 		self.live_image_label.setPixmap(pixmap)
 
